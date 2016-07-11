@@ -14,6 +14,10 @@ app = Flask(__name__)
 DOOR_GPIO_PIN = 3
 SECONDS_PER_OPEN = 3
 
+# cache successful access tokens to reduce the time required to log in
+# NOTE(john): this assumes we restart the flask server every time a user's access is revoked
+ACCESS_TOKEN_WHITE_LIST = set()
+
 # http://stackoverflow.com/questions/23805866/get-facebook-user-id-from-app-scoped-user-id/29154912#29154912
 TRAP_HOUSE_CREW = {
   "10206983426319562" : "Roberto Salami", # 1096260513
@@ -41,16 +45,20 @@ def validate_then_open():
 
 
 def validate_user(access_token):
+  if access_token in ACCESS_TOKEN_WHITE_LIST:
+    return True
   response = requests.get('https://graph.facebook.com/me?access_token={}'.format(access_token))
   print response.text, response
-  return json.loads(response.text)['id'] in TRAP_HOUSE_CREW
+  if json.loads(response.text)['id'] in TRAP_HOUSE_CREW:
+    ACCESS_TOKEN_WHITE_LIST.add(access_token)
+    return True
+
 
 def open_door(seconds=SECONDS_PER_OPEN):
   GPIO.setmode(GPIO.BCM)
   GPIO.setup(DOOR_GPIO_PIN, GPIO.OUT)
   GPIO.output(DOOR_GPIO_PIN, False)
   time.sleep(seconds)
-  GPIOD.output(DOOR_GPIO_PIN, True)
   GPIO.cleanup()
 
 if __name__ == '__main__':
