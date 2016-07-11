@@ -30,4 +30,4 @@ exponent.js
 FB authenticator
 
 ###Deploy
-open_door.conf symlinked to `/etc/init/open_door.conf` on RaspberryPi; called automatically at system startup.
+open_door.conf is copied to `/etc/init/open_door.conf` on RaspberryPi; called automatically at system startup.
