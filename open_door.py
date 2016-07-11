@@ -14,13 +14,13 @@ app = Flask(__name__)
 DOOR_GPIO_PIN = 3
 SECONDS_PER_OPEN = 3
 
-# http://findmyfbid.com/
+# http://stackoverflow.com/questions/23805866/get-facebook-user-id-from-app-scoped-user-id/29154912#29154912
 TRAP_HOUSE_CREW = {
-  1096260513 : "Roberto Salami",
-  1544610238 : "McSpeedy",
-  735923409 : "Willhelm Out Here",
-  1092450390 : "Patchy",
-  1096260827 : "JFrizzle",
+  10206983426319562 : "Roberto Salami", # 1096260513
+  10206416762848274 : "McSpeedy", # 1544610238
+  10154377806823410 : "Willhelm Out Here", # 735923409
+  0 : "Patchy", # 1092450390
+  1 : "JFrizzle", # 1096260827
 }
 
 @app.route('/')
@@ -52,7 +52,7 @@ def open_door(seconds=SECONDS_PER_OPEN):
 
 if __name__ == '__main__':
   # handler = logging.StreamHandler(sys.stdout)
-  handler = logging.RotatingFileHandler('/var/log/open_door.log', maxBytes=10000, backupCount=10)
+  handler = logging.FileHandler('/var/log/open_door.log')
   handler.setLevel(logging.INFO)
   app.logger.addHandler(handler)
   app.run(host='0.0.0.0')
