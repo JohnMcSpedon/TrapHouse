@@ -30,4 +30,4 @@ exponent.js
 FB authenticator
 
 ###Deploy
-open_door.conf lives at `/etc/init/open_door.conf`, is called automatically at system startup.  This syncs with github and runs bootstrap.sh .
+open_door.conf symlinked to `/etc/init/open_door.conf` on RaspberryPi; called automatically at system startup.
