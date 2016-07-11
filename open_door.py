@@ -16,9 +16,9 @@ SECONDS_PER_OPEN = 3
 
 # http://stackoverflow.com/questions/23805866/get-facebook-user-id-from-app-scoped-user-id/29154912#29154912
 TRAP_HOUSE_CREW = {
-  10206983426319562 : "Roberto Salami", # 1096260513
-  10206416762848274 : "McSpeedy", # 1544610238
-  10154377806823410 : "Willhelm Out Here", # 735923409
+  "10206983426319562" : "Roberto Salami", # 1096260513
+  "10206416762848274" : "McSpeedy", # 1544610238
+  "10154377806823410" : "Willhelm Out Here", # 735923409
   0 : "Patchy", # 1092450390
   1 : "JFrizzle", # 1096260827
 }
@@ -34,12 +34,15 @@ def validate_then_open():
   if validate_user(access_token):
     open_door()
     app.logger.info("success")
+    return "welcome"
   else:
     app.logger.info("failure")
+    return "gtfo"
 
 
 def validate_user(access_token):
   response = requests.get('https://graph.facebook.com/me?access_token={}'.format(access_token))
+  print response.text, response
   return json.loads(response.text)['id'] in TRAP_HOUSE_CREW
 
 def open_door(seconds=SECONDS_PER_OPEN):
