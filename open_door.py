@@ -38,6 +38,7 @@ TRAP_HOUSE_CREW = {
 password = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
 
 BLOCK_SIZE = 16
+TIME_LIMIT_S = 30
 
 def unpad (padded):
     pad = ord(padded[-1])
@@ -59,12 +60,13 @@ def _decrypt(edata, nonce, password):
     return unpad(aes.decrypt(edata))
 
 
-@app.route('/unlock', methods=['POST'])
+@app.route('/unlock')
 def unlock():
-    access_token = str(request.json.get('accessToken'))
-    access_time_millis = int(_decrypt(access_token, "", password)) / 1000
-    now_millis = time.time()
-    print 'difference in seconds: {}'.format((now_micros - access_time_millis) / 1000)
+    access_token = str(request.args.get('accessToken'))
+    access_time_s = int(_decrypt(access_token, "", password)) / 1000
+    now_s = time.time()
+    if abs(now_s - access_time_s) < TIME_LIMIT_S:
+        open_door()
     return redirect('http://www.google.com')
 
 
