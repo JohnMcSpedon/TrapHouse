@@ -5,6 +5,11 @@ from flask import request
 
 import RPi.GPIO as GPIO
 
+from Crypto.Cipher import AES
+from hashlib import md5
+import base64
+
+
 import logging
 import json
 import requests
@@ -28,6 +33,35 @@ TRAP_HOUSE_CREW = {
   0 : "Patchy", # 1092450390
   1 : "JFrizzle", # 1096260827
 }
+
+
+password = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+
+BLOCK_SIZE = 16
+
+def unpad (padded):
+    pad = ord(padded[-1])
+    return padded[:-pad]
+
+def _decrypt(edata, nonce, password):
+    edata = base64.urlsafe_b64decode(edata)
+
+    m = md5()
+    m.update(password)
+    key = m.hexdigest()
+
+    m = md5()
+    m.update(password + key)
+    iv = m.hexdigest()
+
+    aes = AES.new(key, AES.MODE_CBC, iv[:16])
+    return unpad(aes.decrypt(edata))
+
+
+@app.route('/unlock', methods=['POST'])
+def unlock():
+  access_token = request.json.get('accessToken')
+  print _decrypt(accessToken, "", password)
 
 @app.route('/')
 def root():
