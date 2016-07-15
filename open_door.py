@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
-from flask import Flask
-from flask import request
+from flask import Flask, redirect, request
 
 import RPi.GPIO as GPIO
 
@@ -17,6 +16,7 @@ import sys
 import time
 
 app = Flask(__name__)
+app.config['DEBUG'] = True
 
 DOOR_GPIO_PIN = 3
 SECONDS_PER_OPEN = 3
@@ -43,6 +43,7 @@ def unpad (padded):
     pad = ord(padded[-1])
     return padded[:-pad]
 
+
 def _decrypt(edata, nonce, password):
     edata = base64.urlsafe_b64decode(edata)
 
@@ -60,42 +61,20 @@ def _decrypt(edata, nonce, password):
 
 @app.route('/unlock', methods=['POST'])
 def unlock():
-  access_token = request.json.get('accessToken')
-  print _decrypt(accessToken, "", password)
-
-@app.route('/')
-def root():
-  return 'peace!'
-
-@app.route('/debug', methods=['POST'])
-def validate_then_open():
-  access_token = request.json.get('accessToken')
-  app.logger.info("request from {} at {}".format(access_token, str(int(time.time()))))
-  if validate_user(access_token):
-    open_door()
-    app.logger.info("success")
-    return "welcome"
-  else:
-    app.logger.info("failure")
-    return "gtfo"
-
-
-def validate_user(access_token):
-  if access_token in ACCESS_TOKEN_WHITE_LIST:
-    return True
-  response = requests.get('https://graph.facebook.com/me?access_token={}'.format(access_token))
-  print response.text, response
-  if json.loads(response.text)['id'] in TRAP_HOUSE_CREW:
-    ACCESS_TOKEN_WHITE_LIST.add(access_token)
-    return True
+    access_token = str(request.json.get('accessToken'))
+    access_time_millis = int(_decrypt(access_token, "", password)) / 1000
+    now_millis = time.time()
+    print 'difference in seconds: {}'.format((now_micros - access_time_millis) / 1000)
+    return redirect('http://www.google.com')
 
 
 def open_door(seconds=SECONDS_PER_OPEN):
-  GPIO.setmode(GPIO.BCM)
-  GPIO.setup(DOOR_GPIO_PIN, GPIO.OUT)
-  GPIO.output(DOOR_GPIO_PIN, False)
-  time.sleep(seconds)
-  GPIO.cleanup()
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(DOOR_GPIO_PIN, GPIO.OUT)
+    GPIO.output(DOOR_GPIO_PIN, False)
+    time.sleep(seconds)
+    GPIO.cleanup()
+
 
 if __name__ == '__main__':
   # handler = logging.StreamHandler(sys.stdout)
