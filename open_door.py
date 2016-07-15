@@ -65,7 +65,9 @@ def unlock():
     access_token = str(request.args.get('accessToken'))
     access_time_s = int(_decrypt(access_token, "", password)) / 1000
     now_s = time.time()
-    if abs(now_s - access_time_s) < TIME_LIMIT_S:
+    diff = abs(now_s - access_time_s)
+    print diff
+    if diff < TIME_LIMIT_S:
         open_door()
     return redirect('http://www.google.com')
 
